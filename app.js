@@ -29,6 +29,7 @@
   const nombreMes = (m) => `${MESES_L[Number(m.slice(5, 7)) - 1]} ${m.slice(0, 4)}`;
   const tarjetaDe = (id) => S.tarjetas.find((t) => t.id === id) || { banco: '¿?', titular: '' };
   const hoy = () => L.hoySantiago();
+  const mesInicial = () => { const m = L.mesDe(hoy()), mi = L.mesDe(C.INICIO); return m < mi ? mi : m; };
 
   function aviso(msg) {
     const el = $('#aviso'); el.textContent = msg; el.hidden = false;
@@ -106,7 +107,8 @@
     const h = hoy();
     if (h < C.INICIO) {
       return `<div class="cabecera"><h1>Hola, Mario y Danna</h1></div>
-        <div class="tarjeta"><h3>Todavía no parte</h3><p style="margin:0">El presupuesto empieza a contar el ${diaMes(C.INICIO)}.</p></div>`;
+        <div class="tarjeta"><h3>Todavía no parte</h3><p style="margin:0;line-height:1.4">El presupuesto empieza a contar el ${diaMes(C.INICIO)}. Desde ese día podrán registrar salidas y ver cuánto les queda.</p>
+        <button class="btn lila" data-ir="mes">Ver el presupuesto de ${MESES_L[mNum(C.INICIO)].toLowerCase()}</button></div>`;
     }
     const cur = S.porDia[h].periodo;
     const lunes = L.lunesDe(h);
@@ -170,6 +172,8 @@
   }
 
   function vRegistrar() {
+    if (hoy() < C.INICIO) return `<div class="cabecera"><h1>Nueva salida</h1></div>
+      <div class="tarjeta"><p style="margin:0">Podrán registrar salidas desde el ${diaMes(C.INICIO)}.</p></div>`;
     const f = S.f || (S.f = formNuevo());
     const w = L.dow(f.fecha);
     const lunesMartes = (w === 1 || w === 2) && !FER[f.fecha];
@@ -213,7 +217,7 @@
   }
 
   function vMes() {
-    const m = S.mes || (S.mes = L.mesDe(hoy()));
+    const m = S.mes || (S.mes = mesInicial());
     const ps = S.periodos.filter((p) => p.mes === m);
     const sal = S.salidas.filter((s) => L.mesDe(s.fecha) === m);
     const trMes = S.transferencias.filter((t) => t.periodo.endsWith('|' + m));
@@ -296,7 +300,7 @@
     const b = e.target.closest('button, [data-ir]');
     if (!b) return;
     const d = b.dataset;
-    if (d.vista || d.ir) { S.vista = d.vista || d.ir; if (S.vista === 'mes') S.mes = L.mesDe(hoy()); render(); window.scrollTo(0, 0); return; }
+    if (d.vista || d.ir) { S.vista = d.vista || d.ir; if (S.vista === 'mes') S.mes = mesInicial(); render(); window.scrollTo(0, 0); return; }
     if (d.transferir) {
       const monto = Number(d.monto);
       const msg = d.anticipado ? `¿Transferir ${clp(monto)} ahora? Después de esto no quedará saldo para salir en este período.` : `¿Confirmas que transfirieron ${clp(monto)} a la cuenta de ahorro?`;
