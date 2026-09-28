@@ -1,0 +1,11 @@
+{
+  "generado": "2026-09-28",
+  "ideas": [
+    { "titulo": "Atardecer en el San Cristóbal", "descripcion": "Subir caminando antes de las 19:00 y bajar con un mote con huesillo.", "costo_aprox": 5000, "momento": "tardecita" },
+    { "titulo": "Picnic en un parque", "descripcion": "Pan, queso y fruta del almacén, una manta y un juego de cartas.", "costo_aprox": 8000, "momento": "fin de semana" },
+    { "titulo": "Barrio nuevo y café", "descripcion": "Caminar un barrio que no conozcan y terminar en un café para dos.", "costo_aprox": 10000, "momento": "cualquiera" },
+    { "titulo": "Museo gratis y helado", "descripcion": "Recorrer un museo con entrada liberada y cerrar con un helado compartido.", "costo_aprox": 4000, "momento": "fin de semana" },
+    { "titulo": "Noche de película en casa", "descripcion": "Elegir una película por turno, cabritas hechas en casa y luces bajas.", "costo_aprox": 0, "momento": "tardecita" },
+    { "titulo": "Feria libre y almuerzo casero", "descripcion": "Ir juntos a la feria, elegir ingredientes y cocinar algo nuevo.", "costo_aprox": 12000, "momento": "fin de semana" }
+  ]
+}
