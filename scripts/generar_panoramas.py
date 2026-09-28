@@ -34,7 +34,8 @@ def main():
               "messages": [{"role": "user", "content": PROMPT.format(hoy=hoy, previas=", ".join(previas) or "ninguna")}]},
         timeout=90,
     )
-    r.raise_for_status()
+    if r.status_code != 200:
+        sys.exit(f"Error {r.status_code} de la API: {r.text}")
     texto = "".join(b.get("text", "") for b in r.json()["content"])
     texto = re.sub(r"```(json)?", "", texto).strip()
     ideas = json.loads(texto)
