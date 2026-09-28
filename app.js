@@ -82,11 +82,6 @@
   }
 
   // ---------- acciones ----------
-  async function alternarActivado(fecha) {
-    if (S.activados.has(fecha)) await q(sb.from('dias_activados').delete().eq('fecha', fecha), 'Día desactivado');
-    else await q(sb.from('dias_activados').insert({ fecha }), 'Día activado: suma $10.000');
-    await cargar();
-  }
   async function transferir(periodo, monto) {
     if (monto <= 0) return;
     await q(sb.from('transferencias').insert({ periodo, monto, fecha: hoy() }), `Transferencia de ${clp(monto)} registrada`);
@@ -120,7 +115,7 @@
     const pct = cur.disponible > 0 ? Math.min(100, Math.round(((cur.gastado + cur.transferido) / cur.disponible) * 100)) : 100;
 
     const hero = cur.libre >= 0
-      ? `<div class="hero"><span style="font-weight:700;font-size:14px">Disponible ${periodosSemana.length > 1 ? 'en este tramo' : 'esta semana'}</span>
+      ? `<div class="hero"><span style="font-weight:700;font-size:14px">Disponible hasta el ${diaMes(cur.hasta)}</span>
           <span class="monto">${clp(cur.libre)}</span>
           <span style="font-size:14px">de ${clp(cur.disponible)} · gastado ${clp(cur.gastado)}${cur.descuento ? ` · descuento anterior ${clp(cur.descuento)}` : ''}${cur.transferido ? ` · ya ahorrado ${clp(cur.transferido)}` : ''}</span>
           <div class="barra"><span style="width:${pct}%"></span></div></div>`
@@ -131,12 +126,14 @@
     const dias = semana.map((d) => {
       const info = S.porDia[d];
       const w = L.dow(d);
-      const opcionalEditable = (w === 1 || w === 2) && !FER[d] && d >= C.INICIO;
-      const cls = ['dia', info && info.tipo === 'opcional' ? 'opcional' : '', info && info.gasto ? 'salieron' : '', d === h ? 'hoy' : '', info && info.periodo !== cur ? 'otro-mes' : ''].join(' ');
+      const bloqueado = info && info.tipo === 'opcional';
+      const cls = ['dia', bloqueado ? 'bloqueado' : '', info && info.gasto ? 'salieron' : '', d === h ? 'hoy' : '', info && info.periodo !== cur ? 'otro-mes' : ''].join(' ');
       const etiqueta = d === h ? 'hoy' : DIAS_L[(w + 6) % 7];
-      const titulo = `${diaMes(d)}${FER[d] ? ' · feriado ' + FER[d] : ''}${info && info.tipo === 'activado' ? ' · activado' : ''}${info && info.gasto ? ' · ' + clp(info.gasto) : ''}`;
-      return `<button class="${cls}" ${opcionalEditable ? `data-activar="${d}" aria-pressed="${S.activados.has(d)}"` : 'disabled'} title="${esc(titulo)}" aria-label="${esc(titulo)}">
-        <span>${etiqueta}</span><span class="circulo">${dNum(d)}</span><span class="gasto">${info && info.gasto ? (Math.round(info.gasto / 100) / 10).toLocaleString('es-CL') + 'k' : FER[d] ? 'feriado' : ''}</span></button>`;
+      const nota = info && info.gasto ? (Math.round(info.gasto / 100) / 10).toLocaleString('es-CL') + 'k'
+        : FER[d] ? 'feriado' : info && info.tipo === 'activado' ? 'activado' : '';
+      const titulo = `${diaMes(d)}${FER[d] ? ' · feriado ' + FER[d] : ''}${bloqueado ? ' · no suma' : ''}${info && info.tipo === 'activado' ? ' · activado' : ''}${info && info.gasto ? ' · ' + clp(info.gasto) : ''}`;
+      return `<div class="${cls}" role="img" aria-label="${esc(titulo)}" title="${esc(titulo)}">
+        <span>${etiqueta}</span><span class="circulo">${dNum(d)}</span><span class="gasto">${nota}</span></div>`;
     }).join('');
 
     let tramos = '';
@@ -152,8 +149,8 @@
 
     const pendientes = S.periodos.filter((p) => p.pendiente > 0);
     const ahorro = `<div class="tarjeta celeste"><h3>Para la cuenta de ahorro</h3>
-      ${cur.libre > 0 ? `<p style="margin:0;line-height:1.4">Si no salen más en este período, pasan <strong>${clp(cur.libre)}</strong> a la cuenta bipersonal.</p>
-        <button class="btn azul" data-transferir="${esc(cur.key)}" data-monto="${cur.libre}">Transferir ${clp(cur.libre)} ahora</button>` : `<p style="margin:0">Este período no deja ahorro por ahora.</p>`}
+      ${cur.libre > 0 ? `<p style="margin:0;line-height:1.4">Lo que quede el ${diaMes(cur.hasta)} pasa a la cuenta bipersonal. Si no salen más, serían <strong>${clp(cur.libre)}</strong>.</p>
+        <button class="btn-texto" style="align-self:flex-start;padding-left:0;text-align:left" data-transferir="${esc(cur.key)}" data-monto="${cur.libre}" data-anticipado="1">¿Ya no saldrán más? Transferir ${clp(cur.libre)} ahora</button>` : cur.transferido ? `<p style="margin:0">Ya transfirieron ${clp(cur.transferido)} de este período.</p>` : `<p style="margin:0">Este período no deja ahorro por ahora.</p>`}
       ${pendientes.map((p) => `<div class="fila"><span>${rango(p)}: ${clp(p.pendiente)} pendiente</span><button class="btn azul chico" data-transferir="${esc(p.key)}" data-monto="${p.pendiente}">Marcar transferido</button></div>`).join('')}
     </div>`;
 
@@ -167,7 +164,7 @@
       <div class="pila grilla-escritorio">
         ${hero}
         <div class="tarjeta ancho"><h3 class="suave">Días de la semana</h3><div class="dias">${dias}</div>
-          <div class="leyenda"><span>Azul: salieron</span><span>Morado claro: día que suma</span><span>Punteado: lunes o martes, tócalo si pueden salir los dos</span></div></div>
+          <div class="leyenda"><span>Azul: salieron</span><span>Morado claro: suma $10.000</span><span>Gris: lunes y martes no suman, salvo feriado</span></div></div>
         ${ahorro}${tramos}${ideaHtml}
       </div>`;
   }
@@ -300,8 +297,12 @@
     if (!b) return;
     const d = b.dataset;
     if (d.vista || d.ir) { S.vista = d.vista || d.ir; if (S.vista === 'mes') S.mes = L.mesDe(hoy()); render(); window.scrollTo(0, 0); return; }
-    if (d.activar) return alternarActivado(d.activar);
-    if (d.transferir) return transferir(d.transferir, Number(d.monto));
+    if (d.transferir) {
+      const monto = Number(d.monto);
+      const msg = d.anticipado ? `¿Transferir ${clp(monto)} ahora? Después de esto no quedará saldo para salir en este período.` : `¿Confirmas que transfirieron ${clp(monto)} a la cuenta de ahorro?`;
+      if (!confirm(msg)) return;
+      return transferir(d.transferir, monto);
+    }
     if (d.mes) { S.mes = d.mes; return render(); }
     if (d.lugar !== undefined && S.f) { S.f.lugar = d.lugar; return render(); }
     if (d.tipo && S.f) { S.f.tipo = d.tipo; return render(); }
