@@ -1,11 +1,77 @@
 {
   "generado": "2026-09-28",
   "ideas": [
-    { "titulo": "Atardecer en el San Cristóbal", "descripcion": "Subir caminando antes de las 19:00 y bajar con un mote con huesillo.", "costo_aprox": 5000, "momento": "tardecita" },
-    { "titulo": "Picnic en un parque", "descripcion": "Pan, queso y fruta del almacén, una manta y un juego de cartas.", "costo_aprox": 8000, "momento": "fin de semana" },
-    { "titulo": "Barrio nuevo y café", "descripcion": "Caminar un barrio que no conozcan y terminar en un café para dos.", "costo_aprox": 10000, "momento": "cualquiera" },
-    { "titulo": "Museo gratis y helado", "descripcion": "Recorrer un museo con entrada liberada y cerrar con un helado compartido.", "costo_aprox": 4000, "momento": "fin de semana" },
-    { "titulo": "Noche de película en casa", "descripcion": "Elegir una película por turno, cabritas hechas en casa y luces bajas.", "costo_aprox": 0, "momento": "tardecita" },
-    { "titulo": "Feria libre y almuerzo casero", "descripcion": "Ir juntos a la feria, elegir ingredientes y cocinar algo nuevo.", "costo_aprox": 12000, "momento": "fin de semana" }
+    {
+      "titulo": "Cerro Santa Lucía en primavera",
+      "descripcion": "Recorrer los jardines floridos del cerro y sacarse fotos entre las flores de temporada.",
+      "costo_aprox": 0,
+      "momento": "fin de semana"
+    },
+    {
+      "titulo": "Sopaipillas caseras con pebre",
+      "descripcion": "Freír sopaipillas en casa y prepararlas con pebre para una once entretenida juntos.",
+      "costo_aprox": 3000,
+      "momento": "cualquiera"
+    },
+    {
+      "titulo": "Parque Bicentenario a pedalear",
+      "descripcion": "Arrendar bicicletas o caminar entre los flamencos y jardines del parque en Vitacura.",
+      "costo_aprox": 8000,
+      "momento": "fin de semana"
+    },
+    {
+      "titulo": "Noche de juegos de mesa",
+      "descripcion": "Invitar a jugar cartas o juegos de mesa propios acompañados de té y galletas.",
+      "costo_aprox": 2000,
+      "momento": "tardecita"
+    },
+    {
+      "titulo": "Centro Cultural Gabriela Mistral gratis",
+      "descripcion": "Visitar las exposiciones de arte contemporáneo sin costo en el GAM del centro.",
+      "costo_aprox": 0,
+      "momento": "cualquiera"
+    },
+    {
+      "titulo": "Anticuchos en food truck",
+      "descripcion": "Buscar un carrito callejero de anticuchos y comerlos sentados en una plaza cercana.",
+      "costo_aprox": 6000,
+      "momento": "tardecita"
+    },
+    {
+      "titulo": "Yoga o estiramiento en casa",
+      "descripcion": "Seguir una rutina de yoga en pareja con un video gratuito de internet en casa.",
+      "costo_aprox": 0,
+      "momento": "cualquiera"
+    },
+    {
+      "titulo": "Vino y quesos económicos",
+      "descripcion": "Comprar una botella de vino barato y quesos para compartir viendo el atardecer desde casa.",
+      "costo_aprox": 9000,
+      "momento": "tardecita"
+    },
+    {
+      "titulo": "Parque de las Esculturas",
+      "descripcion": "Caminar junto al río Mapocho observando esculturas al aire libre de forma gratuita.",
+      "costo_aprox": 0,
+      "momento": "fin de semana"
+    },
+    {
+      "titulo": "Empanadas de horno compartidas",
+      "descripcion": "Comprar empanadas caseras en una picada barrial y comerlas en algún banco al sol.",
+      "costo_aprox": 5000,
+      "momento": "cualquiera"
+    },
+    {
+      "titulo": "Sesión de fotos florecimiento primaveral",
+      "descripcion": "Buscar árboles en flor por el barrio y hacer una sesión de fotos improvisada juntos.",
+      "costo_aprox": 0,
+      "momento": "fin de semana"
+    },
+    {
+      "titulo": "Cocinar receta nueva juntos",
+      "descripcion": "Elegir una receta económica desconocida y cocinarla juntos escuchando música en casa.",
+      "costo_aprox": 7000,
+      "momento": "tardecita"
+    }
   ]
 }
