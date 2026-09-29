@@ -4,8 +4,8 @@ PWA para controlar el ítem "Salidas - Recreación". Se aloja en GitHub Pages ig
 
 ## Reglas que aplica la app
 
-- Semana de lunes a domingo. Cada día hábil suma $10.000.
-- Miércoles a domingo son fijos. Lunes y martes suman solo si se activan (ambos pueden salir) o si son feriado.
+- Tope mensual de $150.000 (`MENSUAL` en `config.js`).
+- Semana de lunes a domingo. En **Mes → Montos por semana** definen cuánto va a cada semana; las que queden en blanco reciben lo que falte del tope, según sus días de salida (miércoles a domingo, más lunes o martes feriados).
 - Cada día pertenece a su mes: una semana que cruza de mes se divide en dos períodos independientes.
 - Si se pasan, el exceso se descuenta del período siguiente, aunque sea del otro mes.
 - Lo que sobra de un período cerrado queda como pendiente de transferir a la cuenta de ahorro. También se puede transferir antes, durante la semana.

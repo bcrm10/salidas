@@ -28,10 +28,18 @@ create table if not exists salidas (
 );
 create index if not exists salidas_fecha_idx on salidas (fecha);
 
--- Lunes o martes en que ambos pudieron salir: suman $10.000 a esa semana.
+-- (En desuso) Lunes o martes activados; la versión actual usa montos por semana.
 create table if not exists dias_activados (
   fecha       date primary key,
   created_at  timestamptz not null default now()
+);
+
+-- Monto definido para cada período (semana × mes). Si falta, la app reparte
+-- automáticamente lo que quede del tope mensual (config.js → MENSUAL).
+create table if not exists montos_periodo (
+  periodo    text primary key,
+  monto      integer not null check (monto >= 0),
+  updated_at timestamptz not null default now()
 );
 
 -- Transferencias a la cuenta de ahorro bipersonal.
@@ -70,7 +78,7 @@ create table if not exists panoramas_guardados (
 do $$
 declare t text;
 begin
-  foreach t in array array['tarjetas','salidas','dias_activados','transferencias','lugares','panoramas_guardados'] loop
+  foreach t in array array['tarjetas','salidas','dias_activados','montos_periodo','transferencias','lugares','panoramas_guardados'] loop
     execute format('alter table %I enable row level security', t);
     execute format('drop policy if exists "pareja" on %I', t);
     execute format('create policy "pareja" on %I for all to authenticated using (true) with check (true)', t);
@@ -78,4 +86,4 @@ begin
 end $$;
 
 -- Tiempo real: que el celular de uno se actualice cuando el otro registra algo.
-alter publication supabase_realtime add table salidas, dias_activados, transferencias, lugares, panoramas_guardados;
+alter publication supabase_realtime add table salidas, dias_activados, montos_periodo, transferencias, lugares, panoramas_guardados;

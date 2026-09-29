@@ -1,4 +1,4 @@
-const CACHE = 'salidas-v2';
+const CACHE = 'salidas-v3';
 const SHELL = ['./', './index.html', './app.js', './logic.js', './feriados.js', './config.js', './manifest.webmanifest', './icons/icon-192.png'];
 self.addEventListener('install', (e) => { e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL))); self.skipWaiting(); });
 self.addEventListener('activate', (e) => {

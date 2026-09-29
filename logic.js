@@ -1,8 +1,6 @@
 // Lógica del presupuesto "Salidas - Recreación".
 // Funciones puras: no tocan la base de datos ni el DOM.
 (function (root) {
-  const CUOTA_DIA = 10000;
-
   const parse = (k) => { const [y, m, d] = k.split('-').map(Number); return new Date(Date.UTC(y, m - 1, d, 12)); };
   const key = (dt) => dt.toISOString().slice(0, 10);
   const add = (k, n) => { const d = parse(k); d.setUTCDate(d.getUTCDate() + n); return key(d); };
@@ -13,25 +11,53 @@
   const hoySantiago = () =>
     new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Santiago', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
 
-  // fijo: miércoles a domingo. Lunes y martes: feriado o activado suman; si no, opcional (0).
-  function tipoDia(k, feriados, activados) {
+  // Tipo de día (solo para mostrar y para el reparto automático):
+  // fijo = miércoles a domingo; lunes y martes = 'opcional' salvo feriado.
+  function tipoDia(k, feriados) {
     const w = dow(k);
-    if (w === 1 || w === 2) {
-      if (feriados[k]) return 'feriado';
-      if (activados.has(k)) return 'activado';
-      return 'opcional';
-    }
+    if (w === 1 || w === 2) return feriados[k] ? 'feriado' : 'opcional';
     return 'fijo';
   }
-  const cuotaDe = (tipo) => (tipo === 'opcional' ? 0 : CUOTA_DIA);
+  const esHabil = (k, feriados) => tipoDia(k, feriados) !== 'opcional';
+
+  // Presupuesto de cada período (semana × mes) de un mes.
+  // Los períodos con monto definido usan ese monto; el resto del total mensual
+  // se reparte en proporción a sus días hábiles, redondeado a $1.000.
+  function planMes(mes, { feriados, montos, mensual, inicio }) {
+    const grupos = new Map();
+    for (let d = mes + '-01'; mesDe(d) === mes; d = add(d, 1)) {
+      if (d < inicio) continue;
+      const pk = periodoDe(d);
+      if (!grupos.has(pk)) grupos.set(pk, 0);
+      if (esHabil(d, feriados)) grupos.set(pk, grupos.get(pk) + 1);
+    }
+    const plan = {};
+    let definido = 0, habilesLibres = 0;
+    for (const [pk, h] of grupos) {
+      if (montos[pk] != null) { plan[pk] = { monto: montos[pk], manual: true }; definido += montos[pk]; }
+      else habilesLibres += h;
+    }
+    const restante = Math.max(0, mensual - definido);
+    let acum = 0, asignado = 0;
+    for (const [pk, h] of grupos) {
+      if (plan[pk]) continue;
+      acum += h;
+      const hasta = habilesLibres ? Math.round((restante * acum) / habilesLibres / 1000) * 1000 : 0;
+      plan[pk] = { monto: hasta - asignado, manual: false };
+      asignado = hasta;
+    }
+    return plan;
+  }
 
   // Recorre día a día desde `inicio` hasta el domingo de la semana de `hoy`
-  // (o hasta `hasta` si es posterior) y arma los períodos semana×mes con arrastre.
-  function calcular({ inicio, hoy, hasta, salidas, activados, feriados, transferencias }) {
+  // (o hasta `hasta` si es posterior) y arma los períodos con arrastre de exceso.
+  function calcular({ inicio, hoy, hasta, salidas, feriados, transferencias, montos = {}, mensual = 0 }) {
     const gastoDia = {};
     for (const s of salidas) if (s.fecha >= inicio) gastoDia[s.fecha] = (gastoDia[s.fecha] || 0) + s.monto;
     const transf = {};
     for (const t of transferencias) transf[t.periodo] = (transf[t.periodo] || 0) + t.monto;
+    const planes = {};
+    const planDe = (mes) => planes[mes] || (planes[mes] = planMes(mes, { feriados, montos, mensual, inicio }));
 
     let fin = add(lunesDe(hoy), 6);
     if (hasta && hasta > fin) fin = add(lunesDe(hasta), 6);
@@ -43,12 +69,11 @@
       const pk = periodoDe(d);
       if (!p || p.key !== pk) {
         const [lunes, mes] = pk.split('|');
-        p = { key: pk, lunes, domingo: add(lunes, 6), mes, dias: [], presupuesto: 0, gastado: 0 };
+        const plan = planDe(mes)[pk] || { monto: 0, manual: false };
+        p = { key: pk, lunes, domingo: add(lunes, 6), mes, dias: [], presupuesto: plan.monto, manual: plan.manual, gastado: 0 };
         periodos.push(p);
       }
-      const tipo = tipoDia(d, feriados, activados);
-      p.dias.push({ fecha: d, tipo, gasto: gastoDia[d] || 0, feriado: feriados[d] || null });
-      p.presupuesto += cuotaDe(tipo);
+      p.dias.push({ fecha: d, tipo: tipoDia(d, feriados), gasto: gastoDia[d] || 0, feriado: feriados[d] || null });
       p.gastado += gastoDia[d] || 0;
     }
 
@@ -69,7 +94,7 @@
     return periodos;
   }
 
-  const api = { CUOTA_DIA, parse, key, add, dow, lunesDe, mesDe, periodoDe, hoySantiago, tipoDia, calcular };
+  const api = { parse, key, add, dow, lunesDe, mesDe, periodoDe, hoySantiago, tipoDia, planMes, calcular };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.Logica = api;
 })(this);

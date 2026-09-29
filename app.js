@@ -12,7 +12,7 @@
 
   const S = {
     vista: 'inicio', mes: null, panTab: 'ideas', filtros: new Set(),
-    tarjetas: [], lugares: [], salidas: [], activados: new Set(), transferencias: [], guardados: [],
+    tarjetas: [], lugares: [], salidas: [], montos: {}, transferencias: [], guardados: [],
     ideas: [], ideasFecha: null, periodos: [], f: null
   };
 
@@ -41,7 +41,7 @@
     if (ok) aviso(ok);
     return data;
   }
-  const formNuevo = (extra = {}) => ({ fecha: hoy(), monto: '', lugar: '', tarjeta: null, tipo: null, nota: '', activar: true, ...extra });
+  const formNuevo = (extra = {}) => ({ fecha: hoy() < C.INICIO ? C.INICIO : hoy(), monto: '', lugar: '', tarjeta: null, tipo: null, nota: '', ...extra });
 
   // ---------- datos ----------
   async function cargar() {
@@ -50,13 +50,13 @@
       sb.from('tarjetas').select('*').order('orden'),
       sb.from('lugares').select('*').order('nombre'),
       sb.from('salidas').select('*').gte('fecha', desde).order('fecha', { ascending: false }),
-      sb.from('dias_activados').select('fecha'),
+      sb.from('montos_periodo').select('periodo, monto'),
       sb.from('transferencias').select('*').order('created_at', { ascending: false }),
       sb.from('panoramas_guardados').select('*').order('created_at', { ascending: false })
     ]);
     const err = [t, l, s, a, tr, g].find((r) => r.error);
     if (err) { aviso('Error al cargar datos: ' + err.error.message); return; }
-    S.tarjetas = t.data; S.lugares = l.data; S.salidas = s.data; S.activados = new Set(a.data.map((x) => x.fecha));
+    S.tarjetas = t.data; S.lugares = l.data; S.salidas = s.data; S.montos = Object.fromEntries(a.data.map((x) => [x.periodo, x.monto]));
     S.transferencias = tr.data; S.guardados = g.data;
     render();
   }
@@ -74,7 +74,7 @@
     const ultimoDiaMes = S.mes ? L.add(L.add(S.mes + '-01', 40).slice(0, 7) + '-01', -1) : null;
     S.periodos = L.calcular({
       inicio: C.INICIO, hoy: hoy(), hasta: ultimoDiaMes, salidas: S.salidas,
-      activados: S.activados, feriados: FER, transferencias: S.transferencias
+      feriados: FER, transferencias: S.transferencias, montos: S.montos, mensual: C.MENSUAL
     });
     const porDia = {};
     for (const p of S.periodos) for (const d of p.dias) porDia[d.fecha] = { ...d, periodo: p };
@@ -101,6 +101,7 @@
     const v = { inicio: vInicio, registrar: vRegistrar, mes: vMes, panoramas: vPanoramas }[S.vista];
     $('#vista').innerHTML = v();
     if (S.vista === 'registrar') actualizarPrevia();
+    if (S.vista === 'mes') actualizarSumaMontos();
   }
 
   function vInicio() {
@@ -128,12 +129,12 @@
     const dias = semana.map((d) => {
       const info = S.porDia[d];
       const w = L.dow(d);
-      const bloqueado = info && info.tipo === 'opcional';
-      const cls = ['dia', bloqueado ? 'bloqueado' : '', info && info.gasto ? 'salieron' : '', d === h ? 'hoy' : '', info && info.periodo !== cur ? 'otro-mes' : ''].join(' ');
+      const bloqueado = !info || info.tipo === 'opcional';
+      const cls = ['dia', bloqueado ? 'bloqueado' : '', info && info.gasto ? 'salieron' : '', d === h ? 'hoy' : '', !info || info.periodo !== cur ? 'otro-mes' : ''].join(' ');
       const etiqueta = d === h ? 'hoy' : DIAS_L[(w + 6) % 7];
       const nota = info && info.gasto ? (Math.round(info.gasto / 100) / 10).toLocaleString('es-CL') + 'k'
-        : FER[d] ? 'feriado' : info && info.tipo === 'activado' ? 'activado' : '';
-      const titulo = `${diaMes(d)}${FER[d] ? ' · feriado ' + FER[d] : ''}${bloqueado ? ' · no suma' : ''}${info && info.tipo === 'activado' ? ' · activado' : ''}${info && info.gasto ? ' · ' + clp(info.gasto) : ''}`;
+        : FER[d] ? 'feriado' : '';
+      const titulo = `${diaMes(d)}${FER[d] ? ' · feriado ' + FER[d] : ''}${bloqueado ? ' · lunes o martes' : ''}${info && info.gasto ? ' · ' + clp(info.gasto) : ''}`;
       return `<div class="${cls}" role="img" aria-label="${esc(titulo)}" title="${esc(titulo)}">
         <span>${etiqueta}</span><span class="circulo">${dNum(d)}</span><span class="gasto">${nota}</span></div>`;
     }).join('');
@@ -166,7 +167,7 @@
       <div class="pila grilla-escritorio">
         ${hero}
         <div class="tarjeta ancho"><h3 class="suave">Días de la semana</h3><div class="dias">${dias}</div>
-          <div class="leyenda"><span>Azul: salieron</span><span>Morado claro: suma $10.000</span><span>Gris: lunes y martes no suman, salvo feriado</span></div></div>
+          <div class="leyenda"><span>Azul: salieron</span><span>Morado claro: día de salida</span><span>Gris: lunes y martes, salvo feriado</span></div></div>
         ${ahorro}${tramos}${ideaHtml}
       </div>`;
   }
@@ -175,8 +176,6 @@
     if (hoy() < C.INICIO) return `<div class="cabecera"><h1>Nueva salida</h1></div>
       <div class="tarjeta"><p style="margin:0">Podrán registrar salidas desde el ${diaMes(C.INICIO)}.</p></div>`;
     const f = S.f || (S.f = formNuevo());
-    const w = L.dow(f.fecha);
-    const lunesMartes = (w === 1 || w === 2) && !FER[f.fecha];
     const lugares = S.lugares.map((l) => `<button type="button" class="chip" data-lugar="${esc(l.nombre)}" aria-pressed="${f.lugar === l.nombre}">${esc(l.nombre)}</button>`).join('');
     const tarjetas = S.tarjetas.map((t) => `<label class="opcion-tarjeta"><span class="inicial ${t.titular === 'Mario' ? 'm' : ''}">${esc(t.titular[0])}</span>
       <span style="flex-grow:1;display:flex;flex-direction:column"><strong>${esc(t.banco)}</strong><span class="chico suave">${esc(t.titular)}</span></span>
@@ -196,7 +195,6 @@
         <div class="lista" style="padding:0 14px">${tarjetas}</div></div>
       <div class="pila" style="gap:8px"><span class="chico suave" style="font-weight:800">Tipo de pago</span>
         <div class="segmento"><button type="button" data-tipo="debito" aria-pressed="${f.tipo === 'debito'}">Débito</button><button type="button" data-tipo="credito" aria-pressed="${f.tipo === 'credito'}">Crédito</button></div></div>
-      ${lunesMartes ? `<label class="check"><input type="checkbox" name="activar" ${f.activar ? 'checked' : ''}>Es ${DIAS[w] === 'lun' ? 'lunes' : 'martes'}: marcar que pudimos salir los dos. Suma $10.000 a la semana.</label>` : ''}
       <label class="campo">Nota (opcional)<input class="entrada" name="nota" value="${esc(f.nota)}" maxlength="140"></label>
       <p id="error-form" role="alert" class="chico" style="margin:0;color:var(--morado);font-weight:800"></p>
       <button class="btn" type="submit" style="min-height:54px">Guardar salida</button>
@@ -209,9 +207,7 @@
     if (f.fecha < C.INICIO) { el.textContent = 'Antes del inicio del presupuesto'; return; }
     const info = S.porDia[f.fecha];
     if (!info) { el.textContent = ''; return; }
-    let libre = info.periodo.libre;
-    if (info.tipo === 'opcional' && f.activar) libre += L.CUOTA_DIA;
-    const quedan = libre - numero(f.monto);
+    const quedan = info.periodo.libre - numero(f.monto);
     el.textContent = quedan >= 0 ? `Quedarán ${clp(quedan)} en este período` : `Se pasan por ${clp(-quedan)}: se descuenta del siguiente`;
     el.className = 'pastilla ' + (quedan >= 0 ? 'p-azul' : 'p-morado');
   }
@@ -235,7 +231,7 @@
       else estado = `<span class="pastilla p-lila">Justo</span>`;
       const feriados = p.dias.filter((d) => d.feriado && (L.dow(d.fecha) === 1 || L.dow(d.fecha) === 2));
       return `<div class="periodo ${p.estado.replace(' ', '-')}"><div class="fila"><strong>${rango(p)}</strong>${estado}</div>
-        <div class="chico suave">${clp(p.presupuesto)}${p.descuento ? ` − ${clp(p.descuento)} de exceso = ${clp(p.disponible)}` : ''} · gastado ${clp(p.gastado)}${p.transferido && p.estado !== 'cerrado' ? ` · ahorrado ${clp(p.transferido)}` : ''}${feriados.length ? ` · feriado ${feriados.map((d) => dNum(d.fecha)).join(' y ')}` : ''}</div></div>`;
+        <div class="chico suave">${clp(p.presupuesto)}${p.manual ? '' : ' (automático)'}${p.descuento ? ` − ${clp(p.descuento)} de exceso = ${clp(p.disponible)}` : ''} · gastado ${clp(p.gastado)}${p.transferido && p.estado !== 'cerrado' ? ` · ahorrado ${clp(p.transferido)}` : ''}${feriados.length ? ` · feriado ${feriados.map((d) => dNum(d.fecha)).join(' y ')}` : ''}</div></div>`;
     }).join('') || `<div class="vacio">No hay períodos en este mes.</div>`;
 
     const lista = sal.map((s) => {
@@ -254,7 +250,7 @@
     return `<div class="cabecera"><h1>${nombreMes(m)}</h1>
       <div><button class="btn-texto" data-mes="${mesAnt}" aria-label="Mes anterior">‹</button><button class="btn-texto" data-mes="${mesSig}" aria-label="Mes siguiente">›</button></div></div>
       <div class="pila grilla-escritorio dos">
-        <div class="stats completo"><div class="stat"><span class="chico suave" style="font-weight:700">Presupuesto</span><strong>${clp(presupuesto)}</strong></div>
+        <div class="stats completo"><div class="stat"><span class="chico suave" style="font-weight:700">Presupuesto</span><strong>${clp(presupuesto)}</strong>${presupuesto !== C.MENSUAL ? `<span class="chico" style="font-weight:800;color:var(--morado)">${presupuesto > C.MENSUAL ? 'Se pasa' : 'Faltan'} ${clp(Math.abs(presupuesto - C.MENSUAL))} del tope</span>` : `<span class="chico suave">tope ${clp(C.MENSUAL)}</span>`}</div>
           <div class="stat lila"><span class="chico" style="font-weight:700">Gastado</span><strong>${clp(gastado)}</strong></div>
           <div class="stat celeste"><span class="chico" style="font-weight:700">Ahorrado</span><strong>${clp(ahorrado)}</strong></div></div>
         <div class="pila"><h3 class="suave">Semanas del mes</h3>${periodos}</div>
@@ -263,8 +259,46 @@
           <div class="stats" style="grid-template-columns:repeat(2,minmax(0,1fr))"><div class="stat lila"><span class="chico" style="font-weight:800">Crédito · por pagar</span><strong>${clp(credito)}</strong></div>
           <div class="stat celeste"><span class="chico" style="font-weight:800">Débito · ya pagado</span><strong>${clp(gastado - credito)}</strong></div></div>
           <div class="lista">${porTarjeta}</div></div>
+        ${editorMontos(ps)}
         ${transf ? `<div class="pila"><h3 class="suave">Transferencias al ahorro</h3><div class="lista">${transf}</div></div>` : ''}
       </div>`;
+  }
+
+  function editorMontos(ps) {
+    const editables = ps.filter((p) => p.estado !== 'cerrado');
+    if (!editables.length) return '';
+    const filas = editables.map((p) => `<label class="fila"><span style="display:flex;flex-direction:column"><strong>${rango(p)}</strong>
+      <span class="chico suave">${p.dias.filter((d) => d.tipo !== 'opcional').length} días de salida</span></span>
+      <input class="entrada" style="width:150px;text-align:right" inputmode="numeric" data-periodo="${esc(p.key)}" value="${p.manual ? clp(p.presupuesto) : ''}" placeholder="${clp(p.presupuesto)} auto" aria-label="Monto para ${rango(p)}"></label>`).join('');
+    return `<div class="pila completo"><h3 class="suave">Montos por semana</h3>
+      <div class="lista">${filas}</div>
+      <p class="chico suave" style="margin:0;line-height:1.4">Una semana en blanco recibe automáticamente lo que falte para llegar a ${clp(C.MENSUAL)}, según sus días de salida.</p>
+      <div class="fila"><span id="suma-montos" class="chico" style="font-weight:800"></span><button class="btn" data-guardar-montos="1">Guardar montos</button></div></div>`;
+  }
+  function leerMontos() {
+    return [...document.querySelectorAll('[data-periodo]')].map((i) => ({ periodo: i.dataset.periodo, monto: i.value.trim() ? numero(i.value) : null }));
+  }
+  function actualizarSumaMontos() {
+    const el = $('#suma-montos');
+    if (!el) return;
+    const m = S.mes;
+    const cerrados = S.periodos.filter((p) => p.mes === m && p.estado === 'cerrado').reduce((a, p) => a + p.presupuesto, 0);
+    const filas = leerMontos();
+    const definido = cerrados + filas.filter((f) => f.monto != null).reduce((a, f) => a + f.monto, 0);
+    const blancos = filas.filter((f) => f.monto == null).length;
+    const dif = C.MENSUAL - definido;
+    if (blancos) el.textContent = dif >= 0 ? `Definido ${clp(definido)} · ${clp(dif)} se reparten en las semanas en blanco` : `Definido ${clp(definido)} · se pasa ${clp(-dif)} del tope`;
+    else el.textContent = dif === 0 ? `Asignado ${clp(definido)} de ${clp(C.MENSUAL)} ✓` : dif > 0 ? `Asignado ${clp(definido)} · faltan ${clp(dif)} para ${clp(C.MENSUAL)}` : `Asignado ${clp(definido)} · se pasa ${clp(-dif)} del tope`;
+    el.style.color = dif < 0 ? 'var(--morado)' : 'var(--azul)';
+  }
+  async function guardarMontos() {
+    const filas = leerMontos();
+    const con = filas.filter((f) => f.monto != null);
+    const sin = filas.filter((f) => f.monto == null).map((f) => f.periodo);
+    if (con.length) await q(sb.from('montos_periodo').upsert(con.map((f) => ({ ...f, updated_at: new Date().toISOString() }))));
+    if (sin.length) await q(sb.from('montos_periodo').delete().in('periodo', sin));
+    aviso('Montos guardados');
+    await cargar();
   }
 
   const FILTROS = [['tardecita', 'Tardecita'], ['fin de semana', 'Fin de semana'], ['gratis', 'Gratis'], ['hasta10', 'Hasta $10.000']];
@@ -308,6 +342,7 @@
       return transferir(d.transferir, monto);
     }
     if (d.mes) { S.mes = d.mes; return render(); }
+    if (d.guardarMontos) return guardarMontos();
     if (d.lugar !== undefined && S.f) { S.f.lugar = d.lugar; return render(); }
     if (d.tipo && S.f) { S.f.tipo = d.tipo; return render(); }
     if (d.tab) { S.panTab = d.tab; return render(); }
@@ -325,14 +360,17 @@
   });
 
   document.addEventListener('input', (e) => {
+    if (e.target.dataset.periodo !== undefined) {
+      const n = numero(e.target.value); e.target.value = n ? clp(n) : '';
+      return actualizarSumaMontos();
+    }
     const form = e.target.closest('#form-salida');
     if (!form || !S.f) return;
-    const { name, value, checked } = e.target;
+    const { name, value } = e.target;
     if (name === 'monto') { S.f.monto = value; const n = numero(value); e.target.value = n ? clp(n) : ''; }
     else if (name === 'lugar') { S.f.lugar = value; form.querySelectorAll('[data-lugar]').forEach((c) => c.setAttribute('aria-pressed', 'false')); }
     else if (name === 'nota') S.f.nota = value;
     else if (name === 'tarjeta') S.f.tarjeta = Number(value);
-    else if (name === 'activar') S.f.activar = checked;
     else if (name === 'fecha') { S.f.fecha = value || hoy(); return render(); }
     actualizarPrevia();
   });
@@ -350,8 +388,6 @@
     const falta = !monto ? 'Ingresa el monto.' : !lugar ? 'Elige o escribe el lugar.' : !f.tarjeta ? 'Elige la tarjeta.' : !f.tipo ? 'Marca si fue débito o crédito.' : f.fecha < C.INICIO ? 'La fecha es anterior al inicio del presupuesto.' : '';
     if (falta) { err.textContent = falta; return; }
     err.textContent = '';
-    const w = L.dow(f.fecha);
-    if ((w === 1 || w === 2) && !FER[f.fecha] && f.activar && !S.activados.has(f.fecha)) await q(sb.from('dias_activados').insert({ fecha: f.fecha }));
     await q(sb.from('salidas').insert({ fecha: f.fecha, monto, lugar, tarjeta_id: f.tarjeta, tipo_pago: f.tipo, nota: f.nota.trim() || null }), 'Salida guardada');
     if (!S.lugares.some((l) => l.nombre.toLowerCase() === lugar.toLowerCase())) await sb.from('lugares').insert({ nombre: lugar });
     S.f = formNuevo(); S.vista = 'inicio';
