@@ -25,7 +25,13 @@
   const mNum = (k) => Number(k.slice(5, 7)) - 1;
   const diaCorto = (k) => `${DIAS[L.dow(k)]} ${dNum(k)}`;
   const diaMes = (k) => `${DIAS[L.dow(k)]} ${dNum(k)} ${MESES[mNum(k)]}`;
-  const rango = (p) => (p.desde === p.hasta ? `${dNum(p.desde)} ${MESES[mNum(p.desde)]}` : `${dNum(p.desde)} – ${dNum(p.hasta)} ${MESES[mNum(p.hasta)]}`);
+  // Rango de días de salida del período (miércoles a domingo, más lunes o martes feriados).
+  const diasSalida = (p) => (p.dias ? p.dias.filter((d) => d.tipo !== 'opcional') : []);
+  const rango = (p) => {
+    const h = diasSalida(p);
+    const a = h.length ? h[0].fecha : p.desde, b = h.length ? h[h.length - 1].fecha : p.hasta;
+    return a === b ? `${dNum(a)} ${MESES[mNum(a)]}` : `${dNum(a)} – ${dNum(b)} ${MESES[mNum(b)]}`;
+  };
   const nombreMes = (m) => `${MESES_L[Number(m.slice(5, 7)) - 1]} ${m.slice(0, 4)}`;
   const tarjetaDe = (id) => S.tarjetas.find((t) => t.id === id) || { banco: '¿?', titular: '' };
   const hoy = () => L.hoySantiago();
@@ -214,7 +220,7 @@
 
   function vMes() {
     const m = S.mes || (S.mes = mesInicial());
-    const ps = S.periodos.filter((p) => p.mes === m);
+    const ps = S.periodos.filter((p) => p.mes === m && (diasSalida(p).length || p.gastado));
     const sal = S.salidas.filter((s) => L.mesDe(s.fecha) === m);
     const trMes = S.transferencias.filter((t) => t.periodo.endsWith('|' + m));
     const presupuesto = ps.reduce((a, p) => a + p.presupuesto, 0);
@@ -268,7 +274,7 @@
     const editables = ps.filter((p) => p.estado !== 'cerrado');
     if (!editables.length) return '';
     const filas = editables.map((p) => `<label class="fila"><span style="display:flex;flex-direction:column"><strong>${rango(p)}</strong>
-      <span class="chico suave">${p.dias.filter((d) => d.tipo !== 'opcional').length} días de salida</span></span>
+      <span class="chico suave">${diasSalida(p).length} días de salida</span></span>
       <input class="entrada" style="width:150px;text-align:right" inputmode="numeric" data-periodo="${esc(p.key)}" value="${p.manual ? clp(p.presupuesto) : ''}" placeholder="${clp(p.presupuesto)} auto" aria-label="Monto para ${rango(p)}"></label>`).join('');
     return `<div class="pila completo"><h3 class="suave">Montos por semana</h3>
       <div class="lista">${filas}</div>
