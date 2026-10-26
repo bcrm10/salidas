@@ -1,77 +1,77 @@
 {
-  "generado": "2026-10-12",
+  "generado": "2026-10-26",
   "ideas": [
     {
-      "titulo": "Picnic en Parque Forestal",
-      "descripcion": "Lleven frutas de estación y disfruten la sombra de los árboles en flor.",
-      "costo_aprox": 5000,
-      "momento": "fin de semana"
-    },
-    {
-      "titulo": "Feria libre de temporada",
-      "descripcion": "Recorran una feria local y compren frutas y verduras frescas de primavera.",
-      "costo_aprox": 8000,
-      "momento": "fin de semana"
-    },
-    {
-      "titulo": "Museo de Bellas Artes gratis",
-      "descripcion": "Visiten las salas permanentes sin costo y comenten sus obras favoritas.",
+      "titulo": "Floración de jacarandás en Providencia",
+      "descripcion": "Caminen por las calles moradas de jacarandás florecidos, típico de octubre en Santiago.",
       "costo_aprox": 0,
-      "momento": "cualquiera"
-    },
-    {
-      "titulo": "Caminata por cerro San Cristóbal",
-      "descripcion": "Suban a pie y disfruten la vista con el día más largo de primavera.",
-      "costo_aprox": 0,
-      "momento": "fin de semana"
-    },
-    {
-      "titulo": "Maratón de películas en casa",
-      "descripcion": "Elijan una trilogía y preparen palomitas caseras para la tarde.",
-      "costo_aprox": 3000,
       "momento": "tardecita"
     },
     {
-      "titulo": "Mote con huesillo callejero",
-      "descripcion": "Prueben este clásico refresco de primavera en un puesto callejero.",
-      "costo_aprox": 3000,
-      "momento": "cualquiera"
-    },
-    {
-      "titulo": "Biblioteca de Santiago gratuita",
-      "descripcion": "Exploren salas de lectura y exposiciones temporales sin costo de entrada.",
+      "titulo": "Centro Cultural Gabriela Mistral gratis",
+      "descripcion": "Recorran las exposiciones de arte contemporáneo sin costo en el GAM este fin de semana.",
       "costo_aprox": 0,
+      "momento": "fin de semana"
+    },
+    {
+      "titulo": "Empanadas de pino en vega",
+      "descripcion": "Compren empanadas recién horneadas en la Vega Central y coman juntos al paso.",
+      "costo_aprox": 6000,
       "momento": "cualquiera"
     },
     {
-      "titulo": "Sándwich a lo pobre barato",
-      "descripcion": "Compartan este plato típico en una fuente de soda económica.",
-      "costo_aprox": 9000,
+      "titulo": "Noche de juegos de mesa",
+      "descripcion": "Jueguen cartas o algún juego de mesa viejo con snacks caseros en casa.",
+      "costo_aprox": 0,
       "momento": "tardecita"
     },
     {
-      "titulo": "Spa casero con mascarillas",
-      "descripcion": "Preparen mascarillas naturales y mímense mutuamente una noche relajada.",
+      "titulo": "Atardecer en Cerro Santa Lucía",
+      "descripcion": "Suban al mirador para ver el atardecer primaveral sobre la ciudad gratis.",
+      "costo_aprox": 0,
+      "momento": "tardecita"
+    },
+    {
+      "titulo": "Helados artesanales de barrio",
+      "descripcion": "Prueben dos sabores distintos en una heladería artesanal cercana, ideal para el calor de primavera.",
       "costo_aprox": 4000,
-      "momento": "tardecita"
-    },
-    {
-      "titulo": "Parque Araucano al atardecer",
-      "descripcion": "Caminen entre jardines florecidos y observen la puesta de sol juntos.",
-      "costo_aprox": 0,
-      "momento": "tardecita"
-    },
-    {
-      "titulo": "Clase de baile por YouTube",
-      "descripcion": "Aprendan pasos de cueca o salsa siguiendo tutoriales gratuitos en casa.",
-      "costo_aprox": 0,
       "momento": "cualquiera"
     },
     {
-      "titulo": "Terremoto en bar de barrio",
-      "descripcion": "Compartan este trago típico chileno en un bar económico y conversado.",
-      "costo_aprox": 7000,
+      "titulo": "Parque Bicentenario en flor",
+      "descripcion": "Paseen entre los jardines florecidos del Parque Bicentenario en Vitacura este fin de semana.",
+      "costo_aprox": 0,
+      "momento": "fin de semana"
+    },
+    {
+      "titulo": "Karaoke casero con playlist",
+      "descripcion": "Armen una playlist de karaoke y canten a todo pulmón en el living.",
+      "costo_aprox": 0,
       "momento": "tardecita"
+    },
+    {
+      "titulo": "Feria artesanal de Bellavista",
+      "descripcion": "Recorran los puestos de artesanía y música callejera en el barrio Bellavista sin gastar.",
+      "costo_aprox": 0,
+      "momento": "fin de semana"
+    },
+    {
+      "titulo": "Completos italianos en plaza",
+      "descripcion": "Compartan dos completos italianos en un carrito de comida cerca de alguna plaza.",
+      "costo_aprox": 5000,
+      "momento": "cualquiera"
+    },
+    {
+      "titulo": "Yoga gratuito en el parque",
+      "descripcion": "Participen en una clase de yoga al aire libre que se hace gratis los fines de semana.",
+      "costo_aprox": 0,
+      "momento": "fin de semana"
+    },
+    {
+      "titulo": "Asado sencillo en la terraza",
+      "descripcion": "Preparen un asado pequeño con verduras y carne económica para disfrutar en casa.",
+      "costo_aprox": 15000,
+      "momento": "fin de semana"
     }
   ]
 }
