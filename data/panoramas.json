@@ -1,75 +1,75 @@
 {
-  "generado": "2026-11-02",
+  "generado": "2026-11-23",
   "ideas": [
     {
-      "titulo": "Picnic en Parque Araucano",
-      "descripcion": "Lleven frutas y jugo para disfrutar la primavera entre árboles y lagunas artificiales.",
-      "costo_aprox": 6000,
-      "momento": "fin de semana"
-    },
-    {
-      "titulo": "Visita al Museo de Arte Precolombino",
-      "descripcion": "Recorran colecciones ancestrales en el centro histórico con entrada liberada ciertos días.",
-      "costo_aprox": 0,
-      "momento": "cualquiera"
-    },
-    {
-      "titulo": "Sopaipillas pasadas en feria",
-      "descripcion": "Prueben sopaipillas con chancaca calientitas en algún puesto callejero de barrio.",
-      "costo_aprox": 2500,
-      "momento": "cualquiera"
-    },
-    {
-      "titulo": "Maratón de películas chilenas",
-      "descripcion": "Vean clásicos del cine nacional en casa con palomitas caseras compartidas.",
-      "costo_aprox": 3000,
-      "momento": "tardecita"
-    },
-    {
-      "titulo": "Caminata por Parque Forestal",
-      "descripcion": "Paseen bajo los árboles centenarios junto al río Mapocho al atardecer.",
+      "titulo": "Atardecer en Cerro Santa Lucía",
+      "descripcion": "Suban al mirador a ver la puesta de sol sobre Santiago gratis.",
       "costo_aprox": 0,
       "momento": "tardecita"
     },
     {
-      "titulo": "Mote con huesillo de verano",
-      "descripcion": "Refrésquense con este dulce tradicional chileno en algún carrito callejero cercano.",
-      "costo_aprox": 2000,
-      "momento": "cualquiera"
-    },
-    {
-      "titulo": "Clases de cocina improvisada",
-      "descripcion": "Inventen una receta nueva juntos usando lo que tengan en el refrigerador.",
+      "titulo": "Ciclopaseo nocturno por Providencia",
+      "descripcion": "Recorran en bicicleta las calles cerradas al tráfico una noche de verano.",
       "costo_aprox": 0,
-      "momento": "cualquiera"
+      "momento": "tardecita"
     },
     {
-      "titulo": "Feria de pulgas en Franklin",
-      "descripcion": "Busquen tesoros vintage y antigüedades curiosas en este barrio patrimonial único.",
-      "costo_aprox": 5000,
-      "momento": "fin de semana"
-    },
-    {
-      "titulo": "Avistamiento de aves en humedal",
-      "descripcion": "Observen aves migratorias de primavera en algún humedal urbano accesible desde Santiago.",
-      "costo_aprox": 0,
-      "momento": "fin de semana"
-    },
-    {
-      "titulo": "Spa casero para dos",
-      "descripcion": "Preparen mascarillas naturales y un baño relajante con velas aromáticas en casa.",
+      "titulo": "Degustación de cerezas de temporada",
+      "descripcion": "Compren cerezas frescas en la feria y pruébenlas juntos en una plaza.",
       "costo_aprox": 4000,
+      "momento": "cualquiera"
+    },
+    {
+      "titulo": "Noche de juegos de mesa",
+      "descripcion": "Jueguen cartas o juegos de mesa en casa con snacks caseros compartidos.",
+      "costo_aprox": 3000,
       "momento": "tardecita"
     },
     {
-      "titulo": "Mercado persa de Bío Bío",
-      "descripcion": "Exploren puestos variados de ropa, música y objetos curiosos un fin de semana.",
+      "titulo": "Concierto gratuito en el GAM",
+      "descripcion": "Revisen la cartelera del Centro Cultural Gabriela Mistral y asistan a una función sin costo.",
+      "costo_aprox": 0,
+      "momento": "fin de semana"
+    },
+    {
+      "titulo": "Amanecer en el San Cristóbal",
+      "descripcion": "Suban temprano caminando al cerro para ver la ciudad despertar.",
+      "costo_aprox": 0,
+      "momento": "fin de semana"
+    },
+    {
+      "titulo": "Completos en fuente de soda",
+      "descripcion": "Compartan completos italianos clásicos en una fuente de soda de barrio.",
+      "costo_aprox": 6000,
+      "momento": "cualquiera"
+    },
+    {
+      "titulo": "Tarde en Quinta Normal",
+      "descripcion": "Paseen entre árboles centenarios y jueguen en el pasto del parque.",
+      "costo_aprox": 0,
+      "momento": "fin de semana"
+    },
+    {
+      "titulo": "Noche de pizza casera",
+      "descripcion": "Preparen juntos una pizza casera con ingredientes sencillos de despensa.",
+      "costo_aprox": 5000,
+      "momento": "tardecita"
+    },
+    {
+      "titulo": "Feria de flores de primavera",
+      "descripcion": "Visiten una feria de flores de temporada y elijan una planta pequeña.",
       "costo_aprox": 3000,
       "momento": "fin de semana"
     },
     {
-      "titulo": "Noche de astronomía casera",
-      "descripcion": "Observen estrellas de noviembre con una app gratuita desde el patio o balcón.",
+      "titulo": "Bici por Parque Bicentenario",
+      "descripcion": "Anden en bicicleta entre los jardines floridos del parque en primavera.",
+      "costo_aprox": 0,
+      "momento": "cualquiera"
+    },
+    {
+      "titulo": "Karaoke casero con playlist",
+      "descripcion": "Armen una playlist de verano y canten karaoke improvisado en el living.",
       "costo_aprox": 0,
       "momento": "tardecita"
     }
